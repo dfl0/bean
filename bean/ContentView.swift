@@ -87,7 +87,7 @@ struct ContentView: View {
         if (timer == nil) {
             timer = Timer.scheduledTimer(withTimeInterval: 0.001, repeats: true) { _ in
                 if (!sessionComplete) {
-                    if (msElapsed < minsSession * 1000) {
+                    if (msElapsed < minsSession * 60 * 1000) {
                         msElapsed += 1
                     }
                     else {
@@ -98,7 +98,7 @@ struct ContentView: View {
                         statusText = "Break"
                     }
                 } else {
-                    if (msElapsed < minsBreak * 1000) {
+                    if (msElapsed < minsBreak * 60 * 1000) {
                         msElapsed += 1
                     }
                     else {
