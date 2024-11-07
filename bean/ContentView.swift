@@ -85,10 +85,10 @@ struct ContentView: View {
 
     private func startTimer() {
         if (timer == nil) {
-            timer = Timer.scheduledTimer(withTimeInterval: 0.001, repeats: true) { _ in
+            timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
                 if (!sessionComplete) {
                     if (msElapsed < minsSession * 60 * 1000) {
-                        msElapsed += 1
+                        msElapsed += 100
                     }
                     else {
                         pauseTimer()
@@ -99,7 +99,7 @@ struct ContentView: View {
                     }
                 } else {
                     if (msElapsed < minsBreak * 60 * 1000) {
-                        msElapsed += 1
+                        msElapsed += 100
                     }
                     else {
                         pauseTimer()
