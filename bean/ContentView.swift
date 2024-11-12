@@ -8,27 +8,35 @@
 import SwiftUI
 
 struct ContentView: View {
+    struct TimerStats: Codable {
+        var totalSeconds: Int
+        var totalSessions: Int
+    }
+
     @State private var timer: Timer?
 
-    @State private var msElapsed: Int = 0
+    @State private var stats = TimerStats(
+        totalSeconds: 0,
+        totalSessions: 0
+    )
+
     @State private var minsSession: Int = 25
     @State private var minsBreak: Int = 5
+    @State private var msElapsed: Int = 0
 
     @State private var sessionComplete: Bool = false
-    @State private var totalSessions: Int = 0
-
     @FocusState private var isFieldFocused: Bool
 
     @State private var statusText: String = "Session"
-
+    
     var body: some View {
         VStack {
             Text(statusText)
-                .opacity(0.75)
+                .opacity(0.7)
 
             Text(formatTime(ms: msElapsed))
                 .font(.largeTitle)
-                .padding(.vertical, 4)
+                .padding(.vertical, 5)
 
             VStack {
                 HStack {
@@ -66,12 +74,19 @@ struct ContentView: View {
             }
             .padding(.bottom)
 
-            Text("Completed \(totalSessions) sessions")
-                .opacity(0.75)
+            Text("Completed \(stats.totalSessions) sessions")
+                .opacity(0.7)
+                .padding(.bottom, 5)
+
+            Text("\((stats.totalSeconds / 3600) > 0 ? "\(stats.totalSeconds / 3600) hr " : "")\((stats.totalSeconds / 60 % 60) > 0 ? "\(stats.totalSeconds / 60 % 60) min " : "0 min ")total")
+                .opacity(0.7)
         }
-        .padding(40)
+        .padding(30)
         .contentShape(.rect)
         .fixedSize(horizontal: true, vertical: false)
+        .onAppear {
+            loadData()
+        }
         .onTapGesture {
             isFieldFocused = false
         }
@@ -89,12 +104,17 @@ struct ContentView: View {
                 if (!sessionComplete) {
                     if (msElapsed < minsSession * 60 * 1000) {
                         msElapsed += 100
+                        if (msElapsed % 1000 == 0) {
+                            stats.totalSeconds += 1
+                            saveData()
+                        }
                     }
                     else {
                         pauseTimer()
                         sessionComplete = true
+                        stats.totalSessions += 1
+                        saveData()
                         msElapsed = 0
-                        totalSessions += 1
                         statusText = "Break"
                     }
                 } else {
@@ -133,6 +153,34 @@ struct ContentView: View {
         sessionComplete = false
         statusText = "Session"
         startTimer()
+    }
+
+    private func saveData() {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .prettyPrinted
+        do {
+            let path = URL.applicationSupportDirectory.appendingPathComponent(Bundle.main.bundleIdentifier ?? "bean", isDirectory: true)
+            let file = path.appendingPathComponent("data.json")
+
+            let data = try encoder.encode(stats)
+            try data.write(to: file)
+        } catch {
+            print(error)
+        }
+    }
+    
+    private func loadData() {
+        let decoder = JSONDecoder()
+        do {
+            let path = URL.applicationSupportDirectory.appendingPathComponent(Bundle.main.bundleIdentifier ?? "bean", isDirectory: true)
+            let file = path.appendingPathComponent("data.json")
+
+            let data = try Data(contentsOf: file)
+
+            stats = try decoder.decode(TimerStats.self, from: data)
+        } catch {
+            saveData()
+        }
     }
 }
 
