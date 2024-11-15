@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     struct TimerStats: Codable {
-        var totalSeconds: Int
+        var totalSeconds: TimeInterval
         var totalSessions: Int
     }
 
@@ -22,7 +22,10 @@ struct ContentView: View {
 
     @State private var minsSession: Int = 25
     @State private var minsBreak: Int = 5
-    @State private var msElapsed: Int = 0
+
+    @State private var startTime: Date?
+    @State private var startingTotalTime: TimeInterval?
+    @State private var elapsedTime: TimeInterval = 0
 
     @State private var sessionComplete: Bool = false
     @FocusState private var isFieldFocused: Bool
@@ -34,7 +37,7 @@ struct ContentView: View {
             Text(statusText)
                 .opacity(0.7)
 
-            Text(formatTime(ms: msElapsed))
+            Text(formatTime(sec: elapsedTime))
                 .font(.largeTitle)
                 .padding(.vertical, 5)
 
@@ -78,7 +81,7 @@ struct ContentView: View {
                 .opacity(0.7)
                 .padding(.bottom, 5)
 
-            Text("\((stats.totalSeconds / 3600) > 0 ? "\(stats.totalSeconds / 3600) hr " : "")\((stats.totalSeconds / 60 % 60) > 0 ? "\(stats.totalSeconds / 60 % 60) min " : "0 min ")total")
+            Text("\((Int(stats.totalSeconds) / 3600) > 0 ? "\(Int(stats.totalSeconds) / 3600) hr " : "")\((Int(stats.totalSeconds) / 60 % 60) > 0 ? "\(Int(stats.totalSeconds) / 60 % 60) min " : "0 min ")total")
                 .opacity(0.7)
         }
         .padding(30)
@@ -92,39 +95,39 @@ struct ContentView: View {
         }
     }
 
-    private func formatTime(ms: Int) -> String {
-        let minutes = (ms / 1000) / 60
-        let seconds = (ms / 1000) % 60
+    private func formatTime(sec: TimeInterval) -> String {
+        let minutes = Int(sec) / 60
+        let seconds = Int(sec) % 60
         return String(format: "%02d:%02d", minutes, seconds)
     }
 
     private func startTimer() {
         if (timer == nil) {
-            timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
+            startTime = .now.addingTimeInterval(-elapsedTime)
+            timer = Timer.scheduledTimer(withTimeInterval: 1/60, repeats: true) { _ in
                 if (!sessionComplete) {
-                    if (msElapsed < minsSession * 60 * 1000) {
-                        msElapsed += 100
-                        if (msElapsed % 1000 == 0) {
-                            stats.totalSeconds += 1
-                            saveData()
-                        }
+                    if (elapsedTime < Double(minsSession * 60)) {
+                        elapsedTime = abs(startTime!.timeIntervalSinceNow)
+                        stats.totalSeconds = startingTotalTime! + elapsedTime
+                        saveData()
                     }
                     else {
                         pauseTimer()
                         sessionComplete = true
                         stats.totalSessions += 1
                         saveData()
-                        msElapsed = 0
+                        startingTotalTime = stats.totalSeconds
+                        elapsedTime = 0
                         statusText = "Break"
                     }
                 } else {
-                    if (msElapsed < minsBreak * 60 * 1000) {
-                        msElapsed += 100
+                    if (elapsedTime < Double(minsBreak * 60)) {
+                        elapsedTime = abs(startTime!.timeIntervalSinceNow)
                     }
                     else {
                         pauseTimer()
                         sessionComplete = false
-                        msElapsed = 0
+                        elapsedTime = 0
                         statusText = "Session"
                     }
                 }
@@ -142,14 +145,14 @@ struct ContentView: View {
     private func resetTimer() {
         timer?.invalidate()
         timer = nil
-        msElapsed = 0
+        elapsedTime = 0
         statusText = sessionComplete ? "Break" : "Session"
     }
 
     private func skipBreak() {
         timer?.invalidate()
         timer = nil
-        msElapsed = 0
+        elapsedTime = 0
         sessionComplete = false
         statusText = "Session"
         startTimer()
@@ -181,6 +184,7 @@ struct ContentView: View {
         } catch {
             saveData()
         }
+        startingTotalTime = stats.totalSeconds
     }
 }
 
