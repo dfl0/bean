@@ -11,7 +11,7 @@ import SwiftUI
 struct beanApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            TimerView()
         }
     }
 }

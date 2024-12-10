@@ -8,18 +8,24 @@
 
 /* Begin PBXBuildFile section */
 		522448632CD8578D00549AF7 /* beanApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 522448622CD8578D00549AF7 /* beanApp.swift */; };
-		522448652CD8578D00549AF7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 522448642CD8578D00549AF7 /* ContentView.swift */; };
 		522448672CD8578E00549AF7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 522448662CD8578E00549AF7 /* Assets.xcassets */; };
 		5224486A2CD8578E00549AF7 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 522448692CD8578E00549AF7 /* Preview Assets.xcassets */; };
+		52C3FD192D069741006FC870 /* TimerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C3FD182D069741006FC870 /* TimerModel.swift */; };
+		52C3FD1B2D0697B2006FC870 /* TimerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C3FD1A2D0697B2006FC870 /* TimerViewModel.swift */; };
+		52C3FD1D2D06A5E4006FC870 /* TimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C3FD1C2D06A5E4006FC870 /* TimerView.swift */; };
+		52C3FD1F2D077CFF006FC870 /* ViewExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C3FD1E2D077CFF006FC870 /* ViewExtensions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		5224485F2CD8578D00549AF7 /* bean.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = bean.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		522448622CD8578D00549AF7 /* beanApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = beanApp.swift; sourceTree = "<group>"; };
-		522448642CD8578D00549AF7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		522448662CD8578E00549AF7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		522448692CD8578E00549AF7 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		5224486B2CD8578E00549AF7 /* bean.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = bean.entitlements; sourceTree = "<group>"; };
+		52C3FD182D069741006FC870 /* TimerModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerModel.swift; sourceTree = "<group>"; };
+		52C3FD1A2D0697B2006FC870 /* TimerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerViewModel.swift; sourceTree = "<group>"; };
+		52C3FD1C2D06A5E4006FC870 /* TimerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerView.swift; sourceTree = "<group>"; };
+		52C3FD1E2D077CFF006FC870 /* ViewExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewExtensions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -53,7 +59,10 @@
 			isa = PBXGroup;
 			children = (
 				522448622CD8578D00549AF7 /* beanApp.swift */,
-				522448642CD8578D00549AF7 /* ContentView.swift */,
+				52C3FD1A2D0697B2006FC870 /* TimerViewModel.swift */,
+				52C3FD182D069741006FC870 /* TimerModel.swift */,
+				52C3FD1C2D06A5E4006FC870 /* TimerView.swift */,
+				52C3FD1E2D077CFF006FC870 /* ViewExtensions.swift */,
 				522448662CD8578E00549AF7 /* Assets.xcassets */,
 				5224486B2CD8578E00549AF7 /* bean.entitlements */,
 				522448682CD8578E00549AF7 /* Preview Content */,
@@ -139,7 +148,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				522448652CD8578D00549AF7 /* ContentView.swift in Sources */,
+				52C3FD1D2D06A5E4006FC870 /* TimerView.swift in Sources */,
+				52C3FD1B2D0697B2006FC870 /* TimerViewModel.swift in Sources */,
+				52C3FD192D069741006FC870 /* TimerModel.swift in Sources */,
+				52C3FD1F2D077CFF006FC870 /* ViewExtensions.swift in Sources */,
 				522448632CD8578D00549AF7 /* beanApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
