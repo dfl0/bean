@@ -20,6 +20,10 @@ struct TimerView: View {
                 .font(.largeTitle)
                 .padding(.vertical, 5)
 
+            Text("[\(vm.speed.formatted())x as fast]")
+                .opacity(0.7)
+                .hidden(vm.speed == 1)
+
             VStack {
                 HStack {
                     !vm.running
