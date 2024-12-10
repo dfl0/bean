@@ -10,6 +10,7 @@ import Foundation
 @Observable
 class TimerViewModel {
     private var timer: Timer?
+    var speed: Double
 
     enum TimerState {
         case Session
@@ -28,6 +29,8 @@ class TimerViewModel {
 
 
     init() {
+        speed = 1  // a value of 1 results in a real-time timer (used to change speed for debugging purposes)
+
         minsSession = 25
         minsBreak = 5
 
@@ -42,13 +45,13 @@ class TimerViewModel {
     func startTimer() {
         guard (timer == nil) else { return }
 
-        let startTime: Date = .now.addingTimeInterval(-elapsedTime)
+        let startTime: Date = .now.addingTimeInterval(-elapsedTime / speed)
 
         running = true
         timer = Timer.scheduledTimer(withTimeInterval: 1 / 60, repeats: true) { [self] _ in
             if (!sessionComplete) {
                 if (elapsedTime < Double(minsSession * 60)) {
-                    elapsedTime = abs(startTime.timeIntervalSinceNow)
+                    elapsedTime = abs(startTime.timeIntervalSinceNow) * speed
                     stats.totalSeconds = totalTime! + elapsedTime
                 } else {
                     pauseTimer()
@@ -60,7 +63,7 @@ class TimerViewModel {
                 }
             } else {
                 if (elapsedTime < Double(minsBreak * 60)) {
-                    elapsedTime = abs(startTime.timeIntervalSinceNow)
+                    elapsedTime = abs(startTime.timeIntervalSinceNow) * speed
                 } else {
                     pauseTimer()
                     sessionComplete = false
