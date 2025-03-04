@@ -5,31 +5,26 @@
 //  Created by dorin flocos on 12/8/24.
 //
 
-import Foundation
+import SwiftUI
 
-@Observable
-class TimerViewModel {
-    private var timer: Timer?
+class TimerViewModel: ObservableObject {
+    private var timer: DispatchSourceTimer?
     var speed: Double
-
-    enum TimerState {
-        case Session
-        case Break
-    }
 
     var minsSession: Int
     var minsBreak: Int
 
-    var running: Bool
-    var sessionComplete: Bool
-    var elapsedTime: TimeInterval
+    @Published var running: Bool
+    @Published var sessionComplete: Bool
+    @Published var elapsedTime: TimeInterval
+    var startTime: Date!
     var totalTime: TimeInterval?
 
     var stats: TimerStats
 
 
     init() {
-        speed = 1  // a value of 1 results in a real-time timer (used to change speed for debugging purposes)
+        speed = 1.0 // a value of 1 results in a real-time timer (used to change speed for debugging purposes)
 
         minsSession = 25
         minsBreak = 5
@@ -45,46 +40,30 @@ class TimerViewModel {
     func startTimer() {
         guard (timer == nil) else { return }
 
-        let startTime: Date = .now.addingTimeInterval(-elapsedTime / speed)
+        startTime = Date().addingTimeInterval(TimeInterval(-elapsedTime/speed))
 
+        let queue = DispatchQueue(label: "bean-timer")
+        timer = DispatchSource.makeTimerSource(flags: .strict, queue: queue)
+
+        timer!.schedule(deadline: .now(), repeating: speed == 1.0 ? .seconds(1) : .milliseconds(Int(1000/speed)), leeway: .milliseconds(50))
+        timer!.setEventHandler(handler: tickTimer)
+
+        timer!.resume()
         running = true
-        timer = Timer.scheduledTimer(withTimeInterval: 1 / 60, repeats: true) { [self] _ in
-            if (!sessionComplete) {
-                if (elapsedTime < Double(minsSession * 60)) {
-                    elapsedTime = abs(startTime.timeIntervalSinceNow) * speed
-                    stats.totalSeconds = totalTime! + elapsedTime
-                } else {
-                    pauseTimer()
-                    sessionComplete = true
-                    stats.totalSessions += 1
-                    saveData()
-                    totalTime = stats.totalSeconds
-                    elapsedTime = 0
-                }
-            } else {
-                if (elapsedTime < Double(minsBreak * 60)) {
-                    elapsedTime = abs(startTime.timeIntervalSinceNow) * speed
-                } else {
-                    pauseTimer()
-                    sessionComplete = false
-                    elapsedTime = 0
-                }
-            }
-        }
     }
 
     func pauseTimer() {
-        timer?.invalidate()
+        timer?.cancel()
         timer = nil
         running = false
         saveData()
     }
 
     func resetTimer() {
-        timer?.invalidate()
+        timer?.cancel()
         timer = nil
-        elapsedTime = 0
         running = false
+        elapsedTime = 0
         loadData()
     }
 
@@ -93,6 +72,43 @@ class TimerViewModel {
         elapsedTime = 0
         sessionComplete = false
         startTimer()
+    }
+
+    private func tickTimer() {
+        DispatchQueue.main.async { [self] in
+            elapsedTime = Date().timeIntervalSince(startTime) * speed
+
+            if !sessionComplete {
+                if elapsedTime >= TimeInterval(minsSession * 60) {
+                    endSession()
+                    return
+                }
+
+                if Int(elapsedTime) % 15 == 0 {
+                    stats.totalSeconds = totalTime! + elapsedTime
+                }
+            } else {
+                if elapsedTime >= TimeInterval(minsBreak * 60) {
+                    endBreak()
+                }
+            }
+        }
+    }
+
+    private func endSession() {
+        playSystemSound("Purr", volume: 0.5)
+        stats.totalSessions += 1
+        pauseTimer()
+        totalTime = stats.totalSeconds
+        sessionComplete = true
+        elapsedTime = 0
+    }
+
+    private func endBreak() {
+        playSystemSound("Frog", volume: 0.5)
+        pauseTimer()
+        sessionComplete = false
+        elapsedTime = 0
     }
 
     private func saveData() {

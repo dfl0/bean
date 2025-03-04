@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct TimerView: View {
-    @State private var vm = TimerViewModel()
+    @ObservedObject private var vm = TimerViewModel()
     @FocusState private var isFieldFocused: Bool
 
     var body: some View {
