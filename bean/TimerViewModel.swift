@@ -102,6 +102,10 @@ class TimerViewModel: ObservableObject {
         totalTime = stats.totalSeconds
         sessionComplete = true
         elapsedTime = 0
+
+        if !NSApp.isActive {
+            NSApp.windows.first?.level = .floating
+        }
     }
 
     private func endBreak() {
@@ -109,6 +113,10 @@ class TimerViewModel: ObservableObject {
         pauseTimer()
         sessionComplete = false
         elapsedTime = 0
+
+        if !NSApp.isActive {
+            NSApp.windows.first?.level = .floating
+        }
     }
 
     private func saveData() {
