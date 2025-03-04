@@ -116,13 +116,18 @@ class TimerViewModel: ObservableObject {
         encoder.outputFormatting = .prettyPrinted
 
         do {
-            let path = URL.applicationSupportDirectory.appendingPathComponent(Bundle.main.bundleIdentifier ?? "bean", isDirectory: true)
-            let file = path.appendingPathComponent("data.json")
+            let path = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+            let dir = path.appendingPathComponent(Bundle.main.bundleIdentifier ?? "bean", isDirectory: true)
+            let file = dir.appendingPathComponent("data.json")
+
+            if !FileManager.default.fileExists(atPath: dir.path) {
+                try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true, attributes: nil)
+            }
 
             let data = try encoder.encode(stats)
             try data.write(to: file)
         } catch {
-            print(error)
+            print("Failed to save data:", error)
         }
     }
 
@@ -132,9 +137,7 @@ class TimerViewModel: ObservableObject {
         do {
             let path = URL.applicationSupportDirectory.appendingPathComponent(Bundle.main.bundleIdentifier ?? "bean", isDirectory: true)
             let file = path.appendingPathComponent("data.json")
-
             let data = try Data(contentsOf: file)
-
             stats = try decoder.decode(TimerStats.self, from: data)
         } catch {
             stats = TimerStats()
