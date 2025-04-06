@@ -13,10 +13,12 @@ class TimerViewModel: ObservableObject {
 
     var minsSession: Int
     var minsBreak: Int
+    var numSessions: Int
 
     @Published var running: Bool
     @Published var sessionComplete: Bool
     @Published var elapsedTime: TimeInterval
+    @Published var sessionsDone: Int
     var startTime: Date!
     var totalTime: TimeInterval?
 
@@ -28,10 +30,12 @@ class TimerViewModel: ObservableObject {
 
         minsSession = 25
         minsBreak = 5
+        numSessions = 4
 
         running = false
         sessionComplete = false
         elapsedTime = 0
+        sessionsDone = 0
 
         stats = TimerStats()
         loadData()
@@ -76,21 +80,16 @@ class TimerViewModel: ObservableObject {
 
     private func tickTimer() {
         DispatchQueue.main.async { [self] in
-            elapsedTime = Date().timeIntervalSince(startTime) * speed
+            guard running else { return }
 
-            if !sessionComplete {
-                if elapsedTime >= TimeInterval(minsSession * 60) {
-                    endSession()
-                    return
-                }
+            let targetInterval = TimeInterval((!sessionComplete
+                                               ? minsSession
+                                               : (sessionsDone == numSessions ? 2*minsBreak : minsBreak)) * 60)
 
-                if Int(elapsedTime) % 15 == 0 {
-                    stats.totalSeconds = totalTime! + elapsedTime
-                }
-            } else {
-                if elapsedTime >= TimeInterval(minsBreak * 60) {
-                    endBreak()
-                }
+            elapsedTime = min(Date().timeIntervalSince(startTime) * speed, targetInterval)
+
+            if elapsedTime >= targetInterval {
+                !sessionComplete ? endSession() : endBreak()
             }
         }
     }
@@ -101,6 +100,7 @@ class TimerViewModel: ObservableObject {
         pauseTimer()
         totalTime = stats.totalSeconds
         sessionComplete = true
+        sessionsDone = sessionsDone % numSessions + 1
         elapsedTime = 0
 
         if !NSApp.isActive {
@@ -113,6 +113,8 @@ class TimerViewModel: ObservableObject {
         pauseTimer()
         sessionComplete = false
         elapsedTime = 0
+
+        if sessionsDone == numSessions { sessionsDone = 0 }
 
         if !NSApp.isActive {
             NSApp.windows.first?.level = .floating

@@ -14,17 +14,34 @@ struct TimerView: View {
     @FocusState private var isFieldFocused: Bool
 
     var body: some View {
-        VStack {
-            Text(!vm.sessionComplete ? "Session" : "Break")
+        VStack(spacing: 5) {
+            Text(!vm.sessionComplete
+                 ? "Session"
+                 : vm.sessionsDone != vm.numSessions
+                   ? "Break"
+                   : "Long Break")
                 .opacity(0.7)
 
             Text("[\(vm.speed.formatted())x as fast]")
                 .opacity(0.7)
                 .hidden(vm.speed == 1)
 
-            Text(formatTime(sec: vm.elapsedTime))
-                .font(.largeTitle)
-                .monospacedDigit()
+            VStack(spacing: 5){
+                Text(formatTime(sec: vm.elapsedTime))
+                    .font(.largeTitle)
+                    .monospacedDigit()
+
+                HStack(spacing: 0) {
+                    ForEach(0..<vm.numSessions, id: \.self) { i in
+                        Circle()
+                            .frame(maxWidth: .infinity, maxHeight: 5)
+                            .opacity(i < vm.sessionsDone ? 1 : 0.25)
+                    }
+                }
+                .frame(maxWidth: 50)
+            }
+            .padding(.vertical, 5)
+            .fixedSize()
 
             VStack {
                 HStack {
@@ -116,8 +133,6 @@ struct TimerView: View {
         return String(format: "%02d:%02d", minutes, seconds)
     }
 }
-
-
 
 #Preview {
     TimerView()
