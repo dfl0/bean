@@ -9,6 +9,8 @@ import SwiftUI
 
 struct TimerView: View {
     @ObservedObject private var vm = TimerViewModel()
+
+    @State private var isFieldFocusable = false
     @FocusState private var isFieldFocused: Bool
 
     var body: some View {
@@ -16,32 +18,57 @@ struct TimerView: View {
             Text(!vm.sessionComplete ? "Session" : "Break")
                 .opacity(0.7)
 
-            Text(formatTime(sec: vm.elapsedTime))
-                .font(.largeTitle)
-                .padding(.vertical, 5)
-
             Text("[\(vm.speed.formatted())x as fast]")
                 .opacity(0.7)
                 .hidden(vm.speed == 1)
 
+            Text(formatTime(sec: vm.elapsedTime))
+                .font(.largeTitle)
+                .monospacedDigit()
+
             VStack {
                 HStack {
-                    !vm.running
-                    ? Button(action: vm.startTimer, label: { Text("Start").frame(maxWidth: .infinity) })
-                    : Button(action: vm.pauseTimer, label: { Text("Pause").frame(maxWidth: .infinity) })
+                    !(vm.running)
+                    ? Button(action: {
+                        vm.startTimer()
+                    }, label: {
+                        Text(vm.elapsedTime == 0 ? "Start" : "Resume")
+                            .padding(.vertical, 2)
+                            .frame(maxWidth: .infinity)
+                    })
+                    : Button(action: {
+                        vm.pauseTimer()
+                    }, label: {
+                        Text("Pause")
+                            .padding(.vertical, 2)
+                            .frame(maxWidth: .infinity)
+                    })
 
-                    !vm.sessionComplete
-                    ? Button(action: vm.resetTimer, label: { Text("Reset").frame(maxWidth: .infinity) })
-                    : Button(action: vm.skipBreak, label: { Text("Skip").frame(maxWidth: .infinity) })
+                    !(vm.sessionComplete)
+                    ? Button(action: {
+                        vm.resetTimer()
+                    }, label: {
+                        Text("Reset")
+                            .padding(.vertical, 2)
+                            .frame(maxWidth: .infinity)
+                    })
+                    : Button(action: {
+                        vm.skipBreak()
+                    }, label: {
+                        Text("Skip")
+                            .padding(.vertical, 2)
+                            .frame(maxWidth: .infinity)
+                    })
                 }
                 .frame(minWidth: 150)
             }
-            .padding(.bottom)
+            .padding(.vertical, 10)
 
             HStack {
                 Text("Session:")
                     .frame(maxWidth: .infinity, alignment: .leading)
                 TextField("25", value: $vm.minsSession, format: .number)
+                    .focusable(isFieldFocusable)
                     .focused($isFieldFocused)
                     .onSubmit { isFieldFocused = false }
                     .frame(width: 30)
@@ -50,9 +77,10 @@ struct TimerView: View {
             }
 
             HStack {
-               Text("Break:")
+                Text("Break:")
                     .frame(maxWidth: .infinity, alignment: .leading)
                 TextField("5", value: $vm.minsBreak, format: .number)
+                    .focusable(isFieldFocusable)
                     .focused($isFieldFocused)
                     .onSubmit { isFieldFocused = false }
                     .frame(width: 30)
@@ -73,6 +101,12 @@ struct TimerView: View {
         .fixedSize(horizontal: true, vertical: false)
         .onTapGesture {
             isFieldFocused = false
+        }
+        .onAppear {
+            // workaround to stop input fields from being focused automatically
+            DispatchQueue.main.async {
+                isFieldFocusable = true
+            }
         }
     }
 
